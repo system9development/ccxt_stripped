@@ -246,7 +246,7 @@ class deepwaters(Exchange):
             quoteId = self.safe_value(market, 'quoteAssetID')
             baseAssetIncrementPrecision = self.parse_number(self.parse_precision(self.safe_string(market, 'baseAssetIncrementPrecision')))
             quoteAssetIncrementPrecision = self.parse_number(self.parse_precision(self.safe_string(market, 'quoteAssetIncrementPrecision')))
-            result.append({
+            entry = {
                 'id': id,
                 'lowercaseId': lowercaseId,
                 'symbol': symbol,
@@ -295,7 +295,9 @@ class deepwaters(Exchange):
                     },
                 },
                 'info': market,
-            })
+            }
+            if base != quote:
+                result.append(entry)
         return result
 
     def fetch_currencies(self, params={}):
@@ -1029,6 +1031,8 @@ class deepwaters(Exchange):
         lastTradeTimestamp = self.parse_number(Precise.string_div(modifiedAtMicros, '1000', 0))
         baseAssetID = self.safe_value(order, 'baseAssetID')
         quoteAssetID = self.safe_value(order, 'quoteAssetID')
+        if quoteAssetID.find('USDC') != -1:
+            quoteAssetID = 'USDC'
         market = market if market else self.market(baseAssetID + '-' + quoteAssetID)
         symbol = self.safe_value(market, 'symbol')
         price = self.safe_number(order, 'price')
